@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: openrouter(model),
+    model: openrouter.chat(model),
     messages: modelMessages,
     onFinish: async ({ text }) => {
       if (!conversationId) return
