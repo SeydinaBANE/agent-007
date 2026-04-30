@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# agent-007
 
-## Getting Started
+Open source AI chat boilerplate. Clone, configure two environment variables, and you have a fully working chat application in minutes.
 
-First, run the development server:
+## What's included
+
+- **Multi-model chat** — switch between Claude, GPT-4o, Gemini, Llama and more via a dropdown
+- **Conversation history** — stored in Supabase, persists across sessions
+- **Streaming responses** — token-by-token output via Vercel AI SDK v6
+- **Markdown rendering** — assistant responses rendered with full formatting
+- **Anonymous sessions** — no login required, each browser gets a UUID
+- **Tool-calling ready** — infrastructure in place to add tools in `lib/tools/`
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 App Router |
+| AI SDK | Vercel AI SDK v6 (`ai`, `@ai-sdk/react`) |
+| Models | OpenRouter (Claude, GPT-4o, Gemini, Llama…) |
+| Database | Supabase (Postgres) |
+| UI | shadcn/ui · Tailwind CSS v4 |
+| Language | TypeScript |
+
+## Quick start
+
+**1. Clone and install**
+
+```bash
+git clone https://github.com/your-username/agent-007.git
+cd agent-007
+npm install
+```
+
+**2. Configure environment**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```
+OPENROUTER_API_KEY=sk-or-v1-...        # openrouter.ai/keys
+NEXT_PUBLIC_SUPABASE_URL=https://...   # your Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...      # your Supabase anon/publishable key
+```
+
+**3. Create database tables**
+
+In your Supabase project → SQL Editor, run the contents of [`supabase/migration.sql`](./supabase/migration.sql).
+
+**4. Run**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Adding models
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit `lib/models.ts` to add or remove models. Any model available on OpenRouter works.
 
-## Learn More
+```ts
+{ id: 'mistralai/mistral-large', name: 'Mistral Large', provider: 'Mistral' },
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Adding tools
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a file in `lib/tools/` and register it in the `tools` option of `streamText` in `app/api/chat/route.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```ts
+// lib/tools/search.ts
+import { tool } from 'ai'
+import { z } from 'zod'
 
-## Deploy on Vercel
+export const searchTool = tool({
+  description: 'Search the web',
+  parameters: z.object({ query: z.string() }),
+  execute: async ({ query }) => { /* ... */ },
+})
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Works on Vercel out of the box. Add the three environment variables in your project settings and deploy.
+
+## License
+
+MIT
